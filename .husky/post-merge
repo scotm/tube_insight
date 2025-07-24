@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+#
+# This hook is run after a successful `git merge`.
+
+changed_files=$(git diff --name-only HEAD@{1} HEAD)
+
+if echo "$changed_files" | grep -q "package.json"; then
+  echo "package.json changed. Running 'bun install'..."
+  bun install
+fi
