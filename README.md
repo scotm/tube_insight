@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TubeInsight
+
+TubeInsight is a Next.js application that leverages Google's Gemini AI to provide intelligent insights, summaries, and analysis of YouTube playlist content.
+
+## Features
+
+- **YouTube Playlist Analysis**: Get in-depth analysis and summaries of your YouTube playlists.
+- **AI-Powered Insights**: Utilize Google Gemini AI for intelligent content understanding.
+- **User Authentication**: Securely sign in with your Google account using NextAuth.js.
 
 ## Getting Started
 
-First, run the development server:
+Follow these steps to set up and run TubeInsight locally.
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- bun (v1.0 or later)
+- Google Cloud project with YouTube Data API v3 and Gemini API enabled.
+
+### Installation
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone https://github.com/your-username/tube-insight.git
+    cd tube-insight
+    ```
+
+2.  **Install dependencies:**
+
+    ```bash
+    bun install
+    ```
+
+3.  **Set up environment variables:**
+
+    Create a `.env.local` file in the root of the project and add the following variables:
+
+    ```
+    # Authentication
+    GOOGLE_CLIENT_ID=
+    GOOGLE_CLIENT_SECRET=
+    NEXTAUTH_URL=http://localhost:3000
+    NEXTAUTH_SECRET=
+
+    # APIs
+    YOUTUBE_API_KEY=
+    GEMINI_API_KEY=
+    ```
+
+    *`NEXTAUTH_SECRET` can be generated with `openssl rand -base64 32`*
+
+### Running the Development Server
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- [Next.js Documentation](https://nextjs.org/docs)
+- [NextAuth.js Documentation](https://next-auth.js.org/)
+- [Google Gemini API Documentation](https://ai.google.dev/)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [shadcn/ui Documentation](https://ui.shadcn.com/docs)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Contributions are welcome! Please see `CONTRIBUTING.md` for details.
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
