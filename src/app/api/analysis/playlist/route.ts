@@ -2,9 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { generativeModel } from "@/lib/gemini";
 import { getVideosForPlaylist } from "@/lib/youtube";
+import { google } from "googleapis";
 
-async function analyzeVideo(videoId: string) {
-	const { title, description } = await getVideoDetails(videoId);
+async function analyzeVideo(accessToken: string, videoId: string) {
+	const { title, description } = await getVideoDetails(accessToken, videoId);
 
 	const prompt = `Analyze the following YouTube video and provide:
   1. A concise summary (around 100-150 words).
@@ -20,10 +21,13 @@ async function analyzeVideo(videoId: string) {
 	return response.text();
 }
 
-async function getVideoDetails(videoId: string) {
-	const youtube = (await import("googleapis")).google.youtube({
+async function getVideoDetails(accessToken: string, videoId: string) {
+	const oauth2Client = new google.auth.OAuth2();
+	oauth2Client.setCredentials({ access_token: accessToken });
+
+	const youtube = google.youtube({
 		version: "v3",
-		auth: process.env.YOUTUBE_API_KEY,
+		auth: oauth2Client,
 	});
 
 	const videoDetailsResponse = await youtube.videos.list({
@@ -40,9 +44,10 @@ async function getVideoDetails(videoId: string) {
 
 export async function POST(req: NextRequest) {
 	const session = await auth();
-	if (!session) {
+	if (!(session as any)?.accessToken) {
 		return new NextResponse("Unauthorized", { status: 401 });
 	}
+	const accessToken = (session as any).accessToken;
 
 	const { playlistId } = await req.json();
 
@@ -51,7 +56,7 @@ export async function POST(req: NextRequest) {
 	}
 
 	try {
-		const videos = await getVideosForPlaylist(playlistId);
+		const videos = await getVideosForPlaylist(accessToken, playlistId);
 		if (!videos) {
 			return new NextResponse("No videos found for this playlist", {
 				status: 404,
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest) {
 				if (video.snippet?.resourceId?.videoId) {
 					const videoId = video.snippet.resourceId.videoId;
 					acc.push(
-						analyzeVideo(videoId).then((analysis) => ({
+						analyzeVideo(accessToken, videoId).then((analysis) => ({
 							videoId,
 							analysis,
 						})),

@@ -1,11 +1,18 @@
 import { google } from "googleapis";
+import { OAuth2Client } from "google-auth-library";
 
-const youtube = google.youtube({
-	version: "v3",
-	auth: process.env.YOUTUBE_API_KEY,
-});
+function getYouTubeClient(accessToken: string) {
+	const oauth2Client = new google.auth.OAuth2();
+	oauth2Client.setCredentials({ access_token: accessToken });
 
-export async function getPlaylists() {
+	return google.youtube({
+		version: "v3",
+		auth: oauth2Client,
+	});
+}
+
+export async function getPlaylists(accessToken: string) {
+	const youtube = getYouTubeClient(accessToken);
 	const response = await youtube.playlists.list({
 		mine: true,
 		part: ["snippet", "contentDetails"],
@@ -14,7 +21,11 @@ export async function getPlaylists() {
 	return response.data.items;
 }
 
-export async function getVideosForPlaylist(playlistId: string) {
+export async function getVideosForPlaylist(
+	accessToken: string,
+	playlistId: string,
+) {
+	const youtube = getYouTubeClient(accessToken);
 	const response = await youtube.playlistItems.list({
 		playlistId: playlistId,
 		part: ["snippet"],

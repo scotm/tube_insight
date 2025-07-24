@@ -171,13 +171,17 @@ export default function PlaylistPage() {
 						return (
 							<div key={videoId} className="border rounded-lg p-4">
 								<div className="flex">
-									<Image
-										src={video.snippet.thumbnails.default.url}
-										alt={video.snippet.title}
-										width={video.snippet.thumbnails.default.width}
-										height={video.snippet.thumbnails.default.height}
-										className="w-48 h-27 object-cover rounded-md mr-4"
-									/>
+									{video.snippet.thumbnails?.default?.url ? (
+										<Image
+											src={video.snippet.thumbnails.default.url}
+											alt={video.snippet.title}
+											width={video.snippet.thumbnails.default.width}
+											height={video.snippet.thumbnails.default.height}
+											className="w-48 h-27 object-cover rounded-md mr-4"
+										/>
+									) : (
+										<div className="w-48 h-27 bg-secondary rounded-md mr-4" />
+									)}
 									<div className="flex-grow">
 										<h2 className="text-xl font-semibold">
 											{video.snippet.title}

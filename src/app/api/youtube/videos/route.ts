@@ -4,7 +4,7 @@ import { getVideosForPlaylist } from "@/lib/youtube";
 
 export async function GET(req: NextRequest) {
 	const session = await auth();
-	if (!session) {
+	if (!(session as any)?.accessToken) {
 		return new NextResponse("Unauthorized", { status: 401 });
 	}
 
@@ -16,7 +16,10 @@ export async function GET(req: NextRequest) {
 	}
 
 	try {
-		const videos = await getVideosForPlaylist(playlistId);
+		const videos = await getVideosForPlaylist(
+			(session as any).accessToken,
+			playlistId,
+		);
 		return NextResponse.json(videos);
 	} catch (error) {
 		console.error(`Error fetching videos for playlist ${playlistId}:`, error);
