@@ -12,7 +12,7 @@
 		"type-check": "tsc --noEmit",
 		"fixup": "bun run lint && bun run format && bun run check",
 		"prepare": "husky",
-		"test": "jest"
+		"test": "jest --config jest.config.js"
 	},
 	"dependencies": {
 		"@google/generative-ai": "^0.24.1",
