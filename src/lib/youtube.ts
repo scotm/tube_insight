@@ -1,5 +1,4 @@
 import { google } from "googleapis";
-import { OAuth2Client } from "google-auth-library";
 
 function getYouTubeClient(accessToken: string) {
 	const oauth2Client = new google.auth.OAuth2();

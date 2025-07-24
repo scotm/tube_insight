@@ -32,20 +32,21 @@ export async function POST(req: NextRequest) {
 			return new NextResponse("Video not found", { status: 404 });
 		}
 
-		const { title, description } = video.snippet;
-
 		// 2. Analyze with Gemini
-		const prompt = `Analyze the following YouTube video and provide:
-    1. A concise summary (around 100-150 words).
-    2. The top 3-5 key topics or themes.
-    3. An overall sentiment analysis (e.g., Positive, Negative, Neutral, Mixed).
+		const prompt = `Act as a world-class strategic analyst using your native YouTube extension. Your analysis should be deep, insightful, and structured for clarity.
 
-    Video Title: "${title}"
-    Video Description: "${description}"
-    `;
+For the video linked below, please provide the following:
+
+1. **The Core Thesis:** In a single, concise sentence, what is the absolute central argument of this video? 
+2. **Key Pillars of Argument:** Present the 3-5 main arguments that support the core thesis. 
+3. **The Hook Deconstructed:** Quote the hook from the first 30 seconds and explain the psychological trigger it uses (e.g., "Creates an information gap," "Challenges a common belief"). 
+4. **Most Tweetable Moment:** Identify the single most powerful, shareable quote from the video and present it as a blockquote.
+5. **Audience & Purpose:** Describe the target audience and the primary goal the creator likely had (e.g., "Educate beginners," "Build brand affinity").
+
+Analyze this video: https://www.youtube.com/watch?v=${videoId}`;
 
 		const result = await generativeModel.generateContent(prompt);
-		const response = await result.response;
+		const response = result.response;
 		const analysis = response.text();
 
 		return NextResponse.json({ analysis });

@@ -1,10 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
+import type { Session } from "next-auth";
 import { auth } from "@/lib/auth";
 import { getVideosForPlaylist } from "@/lib/youtube";
 
+interface SessionWithAccessToken extends Session {
+	accessToken?: string;
+}
+
 export async function GET(req: NextRequest) {
 	const session = await auth();
-	if (!(session as any)?.accessToken) {
+	const realSession = session as SessionWithAccessToken;
+	if (!realSession.accessToken) {
 		return new NextResponse("Unauthorized", { status: 401 });
 	}
 
@@ -17,7 +23,7 @@ export async function GET(req: NextRequest) {
 
 	try {
 		const videos = await getVideosForPlaylist(
-			(session as any).accessToken,
+			realSession.accessToken,
 			playlistId,
 		);
 		return NextResponse.json(videos);
