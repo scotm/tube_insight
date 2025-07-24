@@ -1,8 +1,8 @@
+import { google } from "googleapis";
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, type SessionWithAccessToken } from "@/lib/auth";
 import { generativeModel } from "@/lib/gemini";
 import { getVideosForPlaylist } from "@/lib/youtube";
-import { google } from "googleapis";
 
 async function analyzeVideo(accessToken: string, videoId: string) {
 	const { title, description } = await getVideoDetails(accessToken, videoId);
@@ -44,10 +44,11 @@ async function getVideoDetails(accessToken: string, videoId: string) {
 
 export async function POST(req: NextRequest) {
 	const session = await auth();
-	if (!(session as any)?.accessToken) {
+	const realSession = session as SessionWithAccessToken;
+	if (!realSession.accessToken) {
 		return new NextResponse("Unauthorized", { status: 401 });
 	}
-	const accessToken = (session as any).accessToken;
+	const accessToken = realSession.accessToken;
 
 	const { playlistId } = await req.json();
 

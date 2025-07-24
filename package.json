@@ -10,6 +10,7 @@
 		"format": "biome format . --write",
 		"check": "biome check . --write",
 		"type-check": "tsc --noEmit",
+		"fixup": "bun run lint && bun run format && bun run check",
 		"prepare": "husky",
 		"test": "jest"
 	},

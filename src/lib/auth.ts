@@ -1,11 +1,16 @@
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import NextAuth, { type Session } from "next-auth";
+// biome-ignore lint/correctness/noUnusedImports: For some reason this is required!
 import { JWT } from "next-auth/jwt";
+import GoogleProvider from "next-auth/providers/google";
 
 declare module "next-auth/jwt" {
 	interface JWT {
 		accessToken?: string;
 	}
+}
+
+export interface SessionWithAccessToken extends Session {
+	accessToken?: string;
 }
 
 export const {
@@ -33,7 +38,14 @@ export const {
 			return token;
 		},
 		async session({ session, token }) {
-			(session as any).accessToken = token.accessToken;
+			// assert that the session is a SessionWithAccessToken
+			if (!session) {
+				throw new Error("Session is undefined");
+			}
+			if (!token.accessToken) {
+				throw new Error("Token accessToken is undefined");
+			}
+			(session as SessionWithAccessToken).accessToken = token.accessToken;
 			return session;
 		},
 	},
