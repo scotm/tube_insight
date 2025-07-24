@@ -11,7 +11,7 @@
 		"check": "biome check . --write",
 		"type-check": "tsc --noEmit",
 		"prepare": "husky",
-		"test": "jest"
+		"test": "jest --config jest.config.js"
 	},
 	"dependencies": {
 		"@google/generative-ai": "^0.24.1",
