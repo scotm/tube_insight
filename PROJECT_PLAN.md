@@ -56,7 +56,7 @@ TubeInsight is a Next.js application that enables users to analyze their YouTube
 
 ## File Structure
 
-```
+```plaintext
 src/
 ├── app/
 │   ├── api/auth/[...nextauth]/route.ts

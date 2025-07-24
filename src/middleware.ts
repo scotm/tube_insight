@@ -1,7 +1,7 @@
-import auth from "next-auth"
+import auth from "next-auth";
 
-export default auth
+export default auth;
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/playlists/:path*"],
-}
+	matcher: ["/dashboard/:path*"],
+};

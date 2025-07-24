@@ -25,19 +25,22 @@ TubeInsight is a Next.js application that enables users to analyze their YouTube
 
 ### Installation
 
-1.  **Clone the repository:**
+1. **Clone the repository:**
+
     ```bash
     git clone <repository-url>
     cd tube-insight
     ```
 
-2.  **Install dependencies using bun:**
+2. **Install dependencies using bun:**
+
     ```bash
     bun install
     ```
 
-3.  **Set up environment variables:**
+3. **Set up environment variables:**
     Create a `.env.local` file in the root of the project and add the following variables:
+
     ```bash
     # Authentication
     GOOGLE_CLIENT_ID=
@@ -49,6 +52,7 @@ TubeInsight is a Next.js application that enables users to analyze their YouTube
     YOUTUBE_API_KEY=
     GEMINI_API_KEY=
     ```
+
     *`NEXTAUTH_SECRET` can be generated with `openssl rand -base64 32`*
 
 ### Running the Development Server
