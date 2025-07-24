@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import auth from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { generativeModel } from "@/lib/gemini";
 import { getVideosForPlaylist } from "@/lib/youtube";
 
@@ -40,7 +39,7 @@ async function getVideoDetails(videoId: string) {
 }
 
 export async function POST(req: NextRequest) {
-	const session = await auth(authOptions);
+	const session = await auth();
 	if (!session) {
 		return new NextResponse("Unauthorized", { status: 401 });
 	}

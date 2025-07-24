@@ -22,11 +22,15 @@ interface Playlist {
 }
 
 const fetchPlaylists = async (): Promise<Playlist[]> => {
+	console.log("fetching playlists");
 	const response = await fetch("/api/youtube/playlists");
+	console.log("response", response);
 	if (!response.ok) {
 		throw new Error("Network response was not ok");
 	}
-	return response.json();
+	const data = await response.json();
+	console.log("data", data);
+	return data;
 };
 
 export default function DashboardPage() {

@@ -1,10 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import auth from "next-auth";
+import { auth } from "@/lib/auth";
 import { getVideosForPlaylist } from "@/lib/youtube";
-import { authOptions } from "../../../../lib/auth";
 
 export async function GET(req: NextRequest) {
-	const session = await auth(authOptions);
+	const session = await auth();
 	if (!session) {
 		return new NextResponse("Unauthorized", { status: 401 });
 	}

@@ -1,4 +1,4 @@
-import auth from "next-auth";
+import { auth } from "@/lib/auth";
 
 export default auth;
 
