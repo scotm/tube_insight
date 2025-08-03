@@ -1,0 +1,117 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "dev",
+			"type": "shell",
+			"command": "bun",
+			"args": ["run", "dev"],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated"
+			},
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "build",
+			"type": "shell",
+			"command": "bun",
+			"args": ["run", "build"],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "dedicated"
+			},
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "start",
+			"type": "shell",
+			"command": "bun",
+			"args": ["run", "start"],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "bun",
+			"args": ["run", "lint"],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "dedicated"
+			},
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "format",
+			"type": "shell",
+			"command": "bun",
+			"args": ["run", "format"],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "dedicated"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "type-check",
+			"type": "shell",
+			"command": "bun",
+			"args": ["run", "type-check"],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "dedicated"
+			},
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "test",
+			"type": "shell",
+			"command": "bun",
+			"args": ["run", "test"],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "fixup",
+			"type": "shell",
+			"command": "bun",
+			"args": ["run", "fixup"],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "dedicated"
+			},
+			"problemMatcher": []
+		}
+	]
+}
