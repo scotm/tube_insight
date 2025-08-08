@@ -24,7 +24,7 @@ Practical notes for agents working on TubeInsight: architecture, key flows, DB u
 - Rate limiting
   - `src/lib/rateLimit.ts`: In-memory sliding window; 10 requests / 5 min per key.
 - Batch jobs (in-memory prototype)
-  - `src/lib/analysisQueue.ts`: Non-persistent queue + ephemeral cache; good for demo, not durable.
+  - `src/lib/analysisQueue.ts`: Non-persistent queue; analysis caching centralized in DB (job state remains in-memory).
 
 ## Database (Drizzle + SQLite)
 
@@ -74,7 +74,7 @@ Required vars in `.env.local`:
 ## Findings & Opportunities
 
 - Caching parity
-  - `src/lib/analysisQueue.ts` maintains an in-memory cache; DB now persists single-video analyses. Consider centralizing on DB-backed cache for consistency and durability.
+  - Single-video and playlist analyses both use the DB-backed cache (composite key on video, model, prompt hash) for consistent, durable results.
 - Warm metadata
   - `GET /api/youtube/videos` could call `ensureVideoByYoutubeId` to preload `videos` rows as users browse playlists.
 - Transcript caching

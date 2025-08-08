@@ -1,4 +1,10 @@
-import { generativeModel } from "@/lib/gemini";
+import {
+	ensureVideoByYoutubeId,
+	findAnalysis,
+	upsertAnalysis,
+} from "@/db/repositories/analysis";
+import { generativeModel, modelName } from "@/lib/gemini";
+import { sha256Hex } from "@/lib/hash";
 import { getVideosForPlaylist } from "@/lib/youtube";
 
 export type JobStatus = "queued" | "running" | "done" | "error";
@@ -15,10 +21,7 @@ export type Job = {
 	error?: string;
 };
 
-type CacheEntry = { analysis: string; expiresAt: number };
-
 const jobs = new Map<string, Job>();
-const cache = new Map<string, CacheEntry>();
 
 function uid(): string {
 	return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -26,24 +29,6 @@ function uid(): string {
 
 export function getJob(id: string): Job | undefined {
 	return jobs.get(id);
-}
-
-export function getCached(videoId: string): string | null {
-	const hit = cache.get(videoId);
-	if (!hit) return null;
-	if (Date.now() > hit.expiresAt) {
-		cache.delete(videoId);
-		return null;
-	}
-	return hit.analysis;
-}
-
-function setCache(
-	videoId: string,
-	analysis: string,
-	ttlMs = 24 * 60 * 60 * 1000,
-) {
-	cache.set(videoId, { analysis, expiresAt: Date.now() + ttlMs });
 }
 
 export async function enqueuePlaylist(accessToken: string, playlistId: string) {
@@ -64,9 +49,10 @@ export async function enqueuePlaylist(accessToken: string, playlistId: string) {
 }
 
 async function analyzeVideo(videoId: string): Promise<string> {
-	const cached = getCached(videoId);
-	if (cached) return cached;
+	// Ensure a video row exists (minimal metadata for batch jobs)
+	const videoRow = await ensureVideoByYoutubeId({ youtubeId: videoId });
 
+	// Keep the existing playlist prompt shape but centralize caching in DB
 	const prompt = `Act as a world-class strategic analyst using your native YouTube extension. Your analysis should be deep, insightful, and structured for clarity.
 
 Analyze this video and provide:
@@ -78,9 +64,26 @@ Analyze this video and provide:
 
 Video: https://www.youtube.com/watch?v=${videoId}`;
 
+	const promptHash = sha256Hex(`${modelName}\n${prompt}`);
+
+	const cached = await findAnalysis({
+		videoId: videoRow.id,
+		model: modelName,
+		promptHash,
+	});
+	if (cached) return cached.summary;
+
 	const result = await generativeModel.generateContent(prompt);
 	const text = result.response.text();
-	setCache(videoId, text);
+
+	await upsertAnalysis({
+		videoId: videoRow.id,
+		model: modelName,
+		promptHash,
+		summary: text,
+		insightsJson: { source: "gemini", path: "playlist" },
+	});
+
 	return text;
 }
 
