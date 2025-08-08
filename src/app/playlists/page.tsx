@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { type Playlist, PlaylistArraySchema } from "@/types/youtube";
+import { Skeleton } from "@/components/ui/skeleton";
+const SKELETON_KEYS = ["sk-0", "sk-1", "sk-2", "sk-3", "sk-4", "sk-5"] as const;
 
 export default function PlaylistsPage() {
 	const { data: session } = useSession();
@@ -40,7 +42,19 @@ export default function PlaylistsPage() {
 	}, [session]);
 
 	if (loading)
-		return <div className="text-center mt-8">Loading playlists...</div>;
+		return (
+			<div className="container mx-auto p-4">
+				<h1 className="text-3xl font-bold mb-6">Your YouTube Playlists</h1>
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{SKELETON_KEYS.map((k) => (
+						<div key={k} className="border rounded-lg p-4 space-y-4">
+							<Skeleton className="w-full h-48" />
+							<Skeleton className="h-6 w-48" />
+						</div>
+					))}
+				</div>
+			</div>
+		);
 	if (error)
 		return <div className="text-center mt-8 text-red-500">Error: {error}</div>;
 	if (!session)

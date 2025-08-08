@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+const SKELETON_KEYS = ["sk-0", "sk-1", "sk-2", "sk-3", "sk-4", "sk-5"] as const;
 import { type Playlist, PlaylistArraySchema } from "@/types/youtube";
 
 const fetchPlaylists = async (): Promise<Playlist[]> => {
@@ -45,7 +47,22 @@ export default function DashboardPage() {
 	}, [playlists, searchTerm]);
 
 	if (isLoading)
-		return <div className="text-center mt-8">Loading playlists...</div>;
+		return (
+			<div className="container mx-auto p-4">
+				<div className="flex justify-between items-center mb-6">
+					<Skeleton className="h-8 w-64" />
+					<Skeleton className="h-10 w-64" />
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{SKELETON_KEYS.map((k) => (
+						<div key={k} className="border rounded-lg p-4 space-y-4">
+							<Skeleton className="w-full h-48" />
+							<Skeleton className="h-6 w-48" />
+						</div>
+					))}
+				</div>
+			</div>
+		);
 	if (error)
 		return (
 			<div className="text-center mt-8 text-red-500">

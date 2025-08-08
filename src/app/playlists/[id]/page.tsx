@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type Video, VideoArraySchema } from "@/types/youtube";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useToast } from "@/components/ui/toast";
 
 export default function PlaylistDetailPage() {
@@ -242,7 +244,11 @@ export default function PlaylistDetailPage() {
 						<p className="text-red-500">Failed to analyze this video.</p>
 					)}
 					{analysisResult && (
-						<pre className="whitespace-pre-wrap text-sm">{analysisResult}</pre>
+						<div className="prose prose-neutral max-w-none">
+							<ReactMarkdown remarkPlugins={[remarkGfm]}>
+								{analysisResult}
+							</ReactMarkdown>
+						</div>
 					)}
 				</div>
 			)}
@@ -257,7 +263,11 @@ export default function PlaylistDetailPage() {
 							return (
 								<div key={v.id} className="border rounded p-3">
 									<div className="font-medium mb-2">{v.title}</div>
-									<pre className="whitespace-pre-wrap text-sm">{txt}</pre>
+									<div className="prose prose-neutral max-w-none text-sm">
+										<ReactMarkdown remarkPlugins={[remarkGfm]}>
+											{txt}
+										</ReactMarkdown>
+									</div>
 								</div>
 							);
 						})}
