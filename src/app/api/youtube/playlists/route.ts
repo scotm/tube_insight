@@ -17,7 +17,17 @@ export async function GET() {
 	}
 
 	try {
-		const items = await getPlaylists(realSession.accessToken);
+		const items = (await getPlaylists(realSession.accessToken)) as Array<{
+			id?: string;
+			snippet?: {
+				title?: string;
+				thumbnails?: {
+					default?: youtube_v3.Schema$Thumbnail;
+					medium?: youtube_v3.Schema$Thumbnail;
+					high?: youtube_v3.Schema$Thumbnail;
+				};
+			};
+		}>;
 		const playlists: Playlist[] = (items ?? []).reduce<Playlist[]>((acc, p) => {
 			const id = typeof p?.id === "string" ? p.id : undefined;
 			if (!id) return acc;

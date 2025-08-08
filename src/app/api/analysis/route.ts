@@ -11,6 +11,7 @@ import {
 import { auth } from "@/lib/auth";
 import { generativeModel } from "@/lib/gemini";
 import { AnalysisVideoBodySchema } from "@/types/schemas";
+import { analysisLimiter } from "@/lib/rateLimit";
 
 const youtube = google.youtube({
 	version: "v3",
@@ -21,6 +22,24 @@ export async function POST(req: NextRequest) {
 	const session = await auth();
 	if (!session) {
 		return unauthorized();
+	}
+
+	const user = (session as { user?: { email?: string | null } })?.user;
+	const key = user?.email ?? "anonymous";
+	const lim = analysisLimiter.allow(`legacy:${key}`);
+	if (!lim.allowed) {
+		return new Response(
+			JSON.stringify({
+				error: { message: "Rate limit exceeded. Please retry later." },
+			}),
+			{
+				status: 429,
+				headers: {
+					"Content-Type": "application/json",
+					"Retry-After": String(lim.retryAfter ?? 60),
+				},
+			},
+		);
 	}
 
 	let videoId: string;

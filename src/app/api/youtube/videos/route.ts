@@ -33,10 +33,22 @@ export async function GET(req: NextRequest) {
 	const { playlistId } = parsed.data;
 
 	try {
-		const items = await getVideosForPlaylist(
+		const items = (await getVideosForPlaylist(
 			realSession.accessToken,
 			playlistId,
-		);
+		)) as Array<{
+			id?: string;
+			snippet?: {
+				title?: string;
+				description?: string;
+				thumbnails?: {
+					default?: youtube_v3.Schema$Thumbnail;
+					medium?: youtube_v3.Schema$Thumbnail;
+					high?: youtube_v3.Schema$Thumbnail;
+				};
+				resourceId?: { videoId?: string };
+			};
+		}>;
 		const videos: Video[] = (items ?? []).reduce<Video[]>((acc, it) => {
 			const id =
 				(it?.snippet?.resourceId?.videoId as string | undefined | null) ??

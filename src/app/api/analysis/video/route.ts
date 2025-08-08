@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import { type NextRequest, NextResponse } from "next/server";
 import { badRequest, internal, notFound, ok, unauthorized } from "@/lib/api";
+import { analysisLimiter } from "@/lib/rateLimit";
 import { auth } from "@/lib/auth";
 import { generativeModel } from "@/lib/gemini";
 import { AnalysisVideoBodySchema } from "@/types/schemas";
@@ -13,6 +14,15 @@ const youtube = google.youtube({
 export async function POST(req: NextRequest) {
 	const session = await auth();
 	if (!session) return unauthorized();
+	const user = (session as { user?: { email?: string | null } })?.user;
+	const key = user?.email ?? "anonymous";
+	const lim = analysisLimiter.allow(`video:${key}`);
+	if (!lim.allowed) {
+		return NextResponse.json(
+			{ error: { message: "Rate limit exceeded. Please retry later." } },
+			{ status: 429, headers: { "Retry-After": String(lim.retryAfter ?? 60) } },
+		);
+	}
 
 	let videoId: string;
 	try {

@@ -4,10 +4,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type Video, VideoArraySchema } from "@/types/youtube";
+import { useToast } from "@/components/ui/toast";
 
 export default function PlaylistDetailPage() {
 	const { data: session } = useSession();
@@ -17,6 +18,8 @@ export default function PlaylistDetailPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
 	const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+	const [jobId, setJobId] = useState<string | null>(null);
+	const { show } = useToast();
 
 	const {
 		data: videos = [],
@@ -43,12 +46,102 @@ export default function PlaylistDetailPage() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ videoId }),
 			});
-			if (!res.ok) throw new Error(`Analysis failed (${res.status})`);
+			if (!res.ok) {
+				if (res.status === 429) {
+					const retry = res.headers.get("Retry-After");
+					show({
+						title: "Rate limit exceeded",
+						description: retry
+							? `Try again in ~${retry}s`
+							: "Please try again shortly.",
+						variant: "warning",
+					});
+				}
+				throw new Error(`Analysis failed (${res.status})`);
+			}
 			const json = (await res.json()) as { analysis: string };
 			return json.analysis;
 		},
 		onSuccess: (text) => setAnalysisResult(text),
+		onError: (err: unknown) => {
+			show({
+				title: "Analyze failed",
+				description: String(err),
+				variant: "destructive",
+			});
+		},
 	});
+
+	const startPlaylistAnalysis = useMutation({
+		mutationFn: async () => {
+			const res = await fetch("/api/analysis/playlist", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ playlistId }),
+			});
+			if (!res.ok) {
+				if (res.status === 429) {
+					const retry = res.headers.get("Retry-After");
+					show({
+						title: "Rate limit exceeded",
+						description: retry
+							? `Try again in ~${retry}s`
+							: "Please try again shortly.",
+						variant: "warning",
+					});
+				}
+				throw new Error(`Failed to start analysis (${res.status})`);
+			}
+			const json = (await res.json()) as { jobId: string };
+			return json.jobId;
+		},
+		onSuccess: (id) => {
+			setJobId(id);
+			show({ title: "Started playlist analysis", variant: "success" });
+		},
+		onError: (err: unknown) => {
+			show({
+				title: "Failed to start analysis",
+				description: String(err),
+				variant: "destructive",
+			});
+		},
+	});
+
+	type JobData = {
+		id: string;
+		status: "queued" | "running" | "done" | "error";
+		total: number;
+		completed: number;
+		results: Record<string, string>;
+		error: string | null;
+	};
+
+	const { data: jobStatus } = useQuery<JobData>({
+		queryKey: ["analysisJob", jobId],
+		enabled: !!jobId,
+		queryFn: async (): Promise<JobData> => {
+			const res = await fetch(`/api/analysis/status/${jobId}`);
+			if (!res.ok) throw new Error(`Failed to load job status (${res.status})`);
+			return (await res.json()) as JobData;
+		},
+		refetchInterval: (q) => {
+			if (!jobId) return false;
+			const data = q.state.data as JobData | undefined;
+			if (!data) return 1000;
+			return data.status === "done" || data.status === "error" ? false : 1500;
+		},
+	});
+
+	useEffect(() => {
+		if (jobStatus?.status !== "done" || videos.length === 0) return;
+		const firstId = videos[0].id;
+		const txt = jobStatus.results[firstId];
+		if (txt) {
+			setSelectedVideoId(firstId);
+			setAnalysisResult(txt);
+		}
+	}, [jobStatus, videos]);
 
 	if (!session)
 		return <div className="p-4">Please sign in to view this playlist.</div>;
@@ -70,6 +163,24 @@ export default function PlaylistDetailPage() {
 					onChange={(e) => setSearchTerm(e.target.value)}
 					className="max-w-sm"
 				/>
+			</div>
+
+			<div className="flex gap-3 items-center">
+				<Button
+					onClick={() => startPlaylistAnalysis.mutate()}
+					disabled={startPlaylistAnalysis.isPending || !!jobId}
+				>
+					{startPlaylistAnalysis.isPending
+						? "Starting…"
+						: jobId
+							? "Running…"
+							: "Analyze Playlist"}
+				</Button>
+				{jobStatus && (
+					<div className="text-sm text-muted-foreground">
+						Status: {jobStatus.status} ({jobStatus.completed}/{jobStatus.total})
+					</div>
+				)}
 			</div>
 
 			{filtered.length === 0 ? (
@@ -133,6 +244,24 @@ export default function PlaylistDetailPage() {
 					{analysisResult && (
 						<pre className="whitespace-pre-wrap text-sm">{analysisResult}</pre>
 					)}
+				</div>
+			)}
+
+			{jobStatus?.status === "done" && (
+				<div className="border rounded-lg p-4">
+					<h3 className="font-semibold mb-2">Playlist Analyses</h3>
+					<div className="space-y-4">
+						{videos.map((v) => {
+							const txt = jobStatus.results[v.id];
+							if (!txt) return null;
+							return (
+								<div key={v.id} className="border rounded p-3">
+									<div className="font-medium mb-2">{v.title}</div>
+									<pre className="whitespace-pre-wrap text-sm">{txt}</pre>
+								</div>
+							);
+						})}
+					</div>
 				</div>
 			)}
 		</div>
