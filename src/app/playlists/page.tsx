@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { PlaylistArraySchema, type Playlist } from "@/types/youtube";
+import { type Playlist, PlaylistArraySchema } from "@/types/youtube";
 
 export default function PlaylistsPage() {
 	const { data: session } = useSession();

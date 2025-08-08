@@ -1,13 +1,13 @@
 "use client";
 
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { VideoArraySchema, type Video } from "@/types/youtube";
+import { type Video, VideoArraySchema } from "@/types/youtube";
 
 export default function PlaylistDetailPage() {
 	const { data: session } = useSession();

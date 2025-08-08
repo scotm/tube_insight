@@ -1,8 +1,5 @@
 import { google } from "googleapis";
-import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { generativeModel } from "@/lib/gemini";
-import { AnalysisVideoBodySchema } from "@/types/schemas";
+import type { NextRequest } from "next/server";
 import {
 	badRequest,
 	internal,
@@ -11,6 +8,9 @@ import {
 	toIssues,
 	unauthorized,
 } from "@/lib/api";
+import { auth } from "@/lib/auth";
+import { generativeModel } from "@/lib/gemini";
+import { AnalysisVideoBodySchema } from "@/types/schemas";
 
 const youtube = google.youtube({
 	version: "v3",

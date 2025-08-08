@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { PlaylistArraySchema, type Playlist } from "@/types/youtube";
+import { type Playlist, PlaylistArraySchema } from "@/types/youtube";
 
 const fetchPlaylists = async (): Promise<Playlist[]> => {
 	console.log("fetching playlists");
