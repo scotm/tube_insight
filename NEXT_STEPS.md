@@ -6,7 +6,7 @@ This document translates the current repo state into a concrete, actionable plan
 
 - Phase 1 largely done; early Phase 2 started.
 - Implemented: Google OAuth (NextAuth v5), playlist and videos API, dashboard listing with search, Gemini client, basic analysis endpoint.
-- Missing/Gaps: analysis job/status + progress, pagination, rate limiting, hooks, tests, deployment setup.
+- Missing/Gaps: hooks, tests, deployment setup, enhanced client UX for very large lists.
 
 ## Priority 0 — Unblock Core Flow (1–2 days)
 
@@ -39,19 +39,19 @@ Acceptance criteria
 
 Goal: Non-blocking analysis with basic progress reporting and caching.
 
-1) Endpoints
+1) ~~Endpoints~~ (completed)
 - `POST /api/analysis/playlist` → accepts `{ playlistId }`, enqueues all videos.
 - `GET /api/analysis/status/[jobId]` → returns `{ status: 'queued'|'running'|'done'|'error', progress, results? }`.
 
-2) In-memory job runner
+2) ~~In-memory job runner~~ (completed)
 - Simple queue + job map (no external DB); stores per-video results.
 - 24h in-memory cache for video analyses by `videoId`.
 
-3) Client wiring
+3) ~~Client wiring~~ (completed)
 - On playlist page, add “Analyze Playlist” which triggers playlist analysis job and polls status.
 - For per-video analyze, poll a short-lived per-video job id or return immediately if cached.
 
-4) Rate limiting
+4) ~~Rate limiting~~ (completed)
 - Add lightweight rate limiting on analysis endpoints to prevent abuse.
 
 Acceptance criteria
@@ -61,7 +61,7 @@ Acceptance criteria
 
 ## Priority 2 — YouTube Pagination & Robustness (1–2 days)
 
-1) Server: fetch all pages
+1) ~~Server: fetch all pages~~ (completed)
 - Implement `nextPageToken` loops in `getPlaylists` and `getVideosForPlaylist`.
 - Consider server-side aggregation vs. incremental client fetch.
 
@@ -69,7 +69,7 @@ Acceptance criteria
 - Incremental load (Load more) or virtualized list to handle large result sets.
 
 3) Error handling
-- Surface quota/rate errors distinctly in UI with retry guidance.
+- Surface quota/rate errors distinctly in UI with retry guidance. (Partial: rate-limit handled with toast; quota TBD.)
 
 Acceptance criteria
 - Users with large playlists see complete results or can load progressively.
@@ -123,7 +123,7 @@ Acceptance criteria
 - Bulk analysis UX improvements (select subsets, progress per-video).
 - Search/filter by title, date, channel, analyzed status.
 - Export to PDF/CSV of analysis results.
-- UI polish (dark mode toggle in header, skeleton loaders, toasts).
+- UI polish (dark mode toggle in header, ~~skeleton loaders~~, ~~toasts~~, Markdown rendering for analysis).
 
 ## Decisions / Open Questions
 
@@ -139,10 +139,11 @@ Acceptance criteria
 - [x] Zod validation on analysis and YouTube routes
 - [x] Basic error/loading components
 - [x] Consistent API error/success helpers
-- [ ] Playlist analysis job + status endpoints
-- [ ] In-memory queue + 24h result cache
-- [ ] Rate limiting for analysis routes
-- [ ] YouTube pagination for playlists and videos
+- [x] Playlist analysis job + status endpoints
+- [x] In-memory queue + 24h result cache
+- [x] Rate limiting for analysis routes
+- [x] YouTube pagination for playlists and videos
+- [x] Markdown rendering of analysis results
 - [x] Types in `src/types/`
 - [ ] Hooks in `src/hooks/`
 - [ ] Unit/integration tests and CI workflow

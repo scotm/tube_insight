@@ -12,7 +12,10 @@
 		"type-check": "tsc --noEmit",
 		"fixup": "bun run lint && bun run format && bun run check",
 		"prepare": "husky",
-		"test": "jest"
+		"test": "jest",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"@google/generative-ai": "^0.24.1",
@@ -21,6 +24,7 @@
 		"@tanstack/react-query": "^5.83.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"drizzle-orm": "^0.44.4",
 		"googleapis": "^154.0.0",
 		"lucide-react": "^0.525.0",
 		"next": "15.4.4",
@@ -40,10 +44,13 @@
 		"@testing-library/dom": "^10.4.0",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.3.0",
+		"@types/better-sqlite3": "^7.6.13",
 		"@types/jest": "^30.0.0",
 		"@types/node": "^24",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
+		"better-sqlite3": "^12.2.0",
+		"drizzle-kit": "^0.31.4",
 		"husky": "^9.1.7",
 		"jest": "^30.0.5",
 		"jest-environment-jsdom": "^30.0.5",

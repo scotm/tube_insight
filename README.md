@@ -59,6 +59,24 @@ bun run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
+## Database (Drizzle + SQLite)
+
+This project uses Drizzle ORM with SQLite in development for caching video metadata and analyses.
+
+- Config: `drizzle.config.ts`
+- Schema: `src/db/schema.ts`
+- Client: `src/db/client.ts`
+
+Quick start:
+
+1. Add env (optional): `DATABASE_URL=file:./dev.db` in `.env.local`.
+2. Install deps: `bun add drizzle-orm drizzle-kit`.
+3. Generate migrations: `bun run db:generate`.
+4. Apply migrations: `bun run db:migrate`.
+5. Inspect data: `bun run db:studio`.
+
+Note: `dev.db` is ignored by Git. Switch to Postgres later by updating `drizzle.config.ts`, `DATABASE_URL`, and the client driver.
+
 ## Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)

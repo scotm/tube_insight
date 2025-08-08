@@ -6,6 +6,7 @@ if (!process.env.GEMINI_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+export const modelName = "gemini-2.5-flash-lite" as const;
 export const generativeModel = genAI.getGenerativeModel({
-	model: "gemini-2.5-flash-lite",
+	model: modelName,
 });

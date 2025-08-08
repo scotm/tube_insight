@@ -9,9 +9,15 @@ import {
 	unauthorized,
 } from "@/lib/api";
 import { auth } from "@/lib/auth";
-import { generativeModel } from "@/lib/gemini";
+import { generativeModel, modelName } from "@/lib/gemini";
 import { AnalysisVideoBodySchema } from "@/types/schemas";
 import { analysisLimiter } from "@/lib/rateLimit";
+import { sha256Hex } from "@/lib/hash";
+import {
+	ensureVideoByYoutubeId,
+	findAnalysis,
+	upsertAnalysis,
+} from "@/db/repositories/analysis";
 
 const youtube = google.youtube({
 	version: "v3",
@@ -66,7 +72,20 @@ export async function POST(req: NextRequest) {
 			return notFound("Video not found");
 		}
 
-		// 2. Analyze with Gemini
+		// 2. Ensure video exists in DB
+		const snippet = video.snippet;
+		const publishedAt = snippet.publishedAt
+			? Math.floor(new Date(snippet.publishedAt).getTime() / 1000)
+			: null;
+		const videoRow = await ensureVideoByYoutubeId({
+			youtubeId: videoId,
+			title: snippet.title ?? null,
+			channelId: snippet.channelId ?? null,
+			publishedAt,
+			ownerId: user?.email ?? null,
+		});
+
+		// 3. Prepare prompt and check cache
 		const prompt = `Act as a world-class strategic analyst using your native YouTube extension. Your analysis should be deep, insightful, and structured for clarity.
 
 For the video linked below, please provide the following:
@@ -79,9 +98,28 @@ For the video linked below, please provide the following:
 
 Analyze this video: https://www.youtube.com/watch?v=${videoId}`;
 
+		const promptHash = sha256Hex(`${modelName}\n${prompt}`);
+		const cached = await findAnalysis({
+			videoId: videoRow.id,
+			model: modelName,
+			promptHash,
+		});
+		if (cached) {
+			return ok({ analysis: cached.summary });
+		}
+
+		// 4. Analyze with Gemini and persist
 		const result = await generativeModel.generateContent(prompt);
 		const response = result.response;
 		const analysis = response.text();
+
+		await upsertAnalysis({
+			videoId: videoRow.id,
+			model: modelName,
+			promptHash,
+			summary: analysis,
+			insightsJson: { source: "gemini", version: 1 },
+		});
 
 		return ok({ analysis });
 	} catch (error) {
