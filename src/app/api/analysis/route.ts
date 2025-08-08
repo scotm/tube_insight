@@ -2,6 +2,15 @@ import { google } from "googleapis";
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { generativeModel } from "@/lib/gemini";
+import { AnalysisVideoBodySchema } from "@/types/schemas";
+import {
+	badRequest,
+	internal,
+	notFound,
+	ok,
+	toIssues,
+	unauthorized,
+} from "@/lib/api";
 
 const youtube = google.youtube({
 	version: "v3",
@@ -11,13 +20,19 @@ const youtube = google.youtube({
 export async function POST(req: NextRequest) {
 	const session = await auth();
 	if (!session) {
-		return new NextResponse("Unauthorized", { status: 401 });
+		return unauthorized();
 	}
 
-	const { videoId } = await req.json();
-
-	if (!videoId) {
-		return new NextResponse("Video ID is required", { status: 400 });
+	let videoId: string;
+	try {
+		const json = await req.json();
+		const parsed = AnalysisVideoBodySchema.safeParse(json);
+		if (!parsed.success) {
+			return badRequest("Invalid request body", toIssues(parsed.error));
+		}
+		videoId = parsed.data.videoId;
+	} catch {
+		return badRequest("Invalid JSON body");
 	}
 
 	try {
@@ -29,7 +44,7 @@ export async function POST(req: NextRequest) {
 
 		const video = videoDetailsResponse.data.items?.[0];
 		if (!video || !video.snippet) {
-			return new NextResponse("Video not found", { status: 404 });
+			return notFound("Video not found");
 		}
 
 		// 2. Analyze with Gemini
@@ -49,9 +64,9 @@ Analyze this video: https://www.youtube.com/watch?v=${videoId}`;
 		const response = result.response;
 		const analysis = response.text();
 
-		return NextResponse.json({ analysis });
+		return ok({ analysis });
 	} catch (error) {
 		console.error(`Error analyzing video ${videoId}:`, error);
-		return new NextResponse("Internal Server Error", { status: 500 });
+		return internal();
 	}
 }

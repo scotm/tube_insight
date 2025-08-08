@@ -20,24 +20,24 @@ Follow these steps to set up and run TubeInsight locally.
 
 ### Installation
 
-1.  **Clone the repository:**
+1. **Clone the repository:**
 
     ```bash
     git clone https://github.com/your-username/tube-insight.git
     cd tube-insight
     ```
 
-2.  **Install dependencies:**
+2. **Install dependencies:**
 
     ```bash
     bun install
     ```
 
-3.  **Set up environment variables:**
+3. **Set up environment variables:**
 
     Create a `.env.local` file in the root of the project and add the following variables:
 
-    ```
+    ```plaintext
     # Authentication
     GOOGLE_CLIENT_ID=
     GOOGLE_CLIENT_SECRET=

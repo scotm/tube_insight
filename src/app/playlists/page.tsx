@@ -4,20 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-
-interface Playlist {
-	id: string;
-	snippet: {
-		title: string;
-		thumbnails: {
-			default: {
-				url: string;
-				width: number;
-				height: number;
-			};
-		};
-	};
-}
+import { PlaylistArraySchema, type Playlist } from "@/types/youtube";
 
 export default function PlaylistsPage() {
 	const { data: session } = useSession();
@@ -34,7 +21,10 @@ export default function PlaylistsPage() {
 						throw new Error(`HTTP error! status: ${response.status}`);
 					}
 					const data = await response.json();
-					setPlaylists(data);
+					const parsed = PlaylistArraySchema.safeParse(data);
+					if (!parsed.success)
+						throw new Error("Unexpected playlist response shape");
+					setPlaylists(parsed.data);
 				} catch (e) {
 					if (e instanceof Error) {
 						setError(e.message);
@@ -68,16 +58,18 @@ export default function PlaylistsPage() {
 					{playlists.map((playlist) => (
 						<Link key={playlist.id} href={`/playlists/${playlist.id}`}>
 							<div className="border rounded-lg p-4 hover:shadow-lg transition-shadow duration-200">
-								<Image
-									src={playlist.snippet.thumbnails.default.url}
-									alt={playlist.snippet.title}
-									width={playlist.snippet.thumbnails.default.width}
-									height={playlist.snippet.thumbnails.default.height}
-									className="w-full h-48 object-cover rounded-md mb-4"
-								/>
-								<h2 className="text-xl font-semibold">
-									{playlist.snippet.title}
-								</h2>
+								{playlist.thumbnails.default ? (
+									<Image
+										src={playlist.thumbnails.default.url}
+										alt={playlist.title}
+										width={playlist.thumbnails.default.width}
+										height={playlist.thumbnails.default.height}
+										className="w-full h-48 object-cover rounded-md mb-4"
+									/>
+								) : (
+									<div className="w-full h-48 bg-secondary rounded mb-4" />
+								)}
+								<h2 className="text-xl font-semibold">{playlist.title}</h2>
 							</div>
 						</Link>
 					))}

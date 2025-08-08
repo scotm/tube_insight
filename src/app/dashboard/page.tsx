@@ -6,20 +6,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
-
-interface Playlist {
-	id: string;
-	snippet: {
-		title: string;
-		thumbnails: {
-			default: {
-				url: string;
-				width: number;
-				height: number;
-			};
-		};
-	};
-}
+import { PlaylistArraySchema, type Playlist } from "@/types/youtube";
 
 const fetchPlaylists = async (): Promise<Playlist[]> => {
 	console.log("fetching playlists");
@@ -30,7 +17,11 @@ const fetchPlaylists = async (): Promise<Playlist[]> => {
 	}
 	const data = await response.json();
 	console.log("data", data);
-	return data;
+	const parsed = PlaylistArraySchema.safeParse(data);
+	if (!parsed.success) {
+		throw new Error("Unexpected playlist response shape");
+	}
+	return parsed.data;
 };
 
 export default function DashboardPage() {
@@ -49,7 +40,7 @@ export default function DashboardPage() {
 
 	const filteredPlaylists = useMemo(() => {
 		return playlists.filter((playlist) =>
-			playlist.snippet.title.toLowerCase().includes(searchTerm.toLowerCase()),
+			playlist.title.toLowerCase().includes(searchTerm.toLowerCase()),
 		);
 	}, [playlists, searchTerm]);
 
@@ -87,16 +78,18 @@ export default function DashboardPage() {
 					{filteredPlaylists.map((playlist) => (
 						<Link key={playlist.id} href={`/playlists/${playlist.id}`}>
 							<div className="border rounded-lg p-4 hover:shadow-lg transition-shadow duration-200">
-								<Image
-									src={playlist.snippet.thumbnails.default.url}
-									alt={playlist.snippet.title}
-									width={playlist.snippet.thumbnails.default.width}
-									height={playlist.snippet.thumbnails.default.height}
-									className="w-full h-48 object-cover rounded-md mb-4"
-								/>
-								<h2 className="text-xl font-semibold">
-									{playlist.snippet.title}
-								</h2>
+								{playlist.thumbnails.default ? (
+									<Image
+										src={playlist.thumbnails.default.url}
+										alt={playlist.title}
+										width={playlist.thumbnails.default.width}
+										height={playlist.thumbnails.default.height}
+										className="w-full h-48 object-cover rounded-md mb-4"
+									/>
+								) : (
+									<div className="w-full h-48 bg-secondary rounded mb-4" />
+								)}
+								<h2 className="text-xl font-semibold">{playlist.title}</h2>
 							</div>
 						</Link>
 					))}

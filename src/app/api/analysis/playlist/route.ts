@@ -1,46 +1,47 @@
-import { google } from "googleapis";
+// import { google } from "googleapis";
 import { type NextRequest, NextResponse } from "next/server";
 import { auth, type SessionWithAccessToken } from "@/lib/auth";
 import { generativeModel } from "@/lib/gemini";
 import { getVideosForPlaylist } from "@/lib/youtube";
 
-async function analyzeVideo(accessToken: string, videoId: string) {
-	const { title, description } = await getVideoDetails(accessToken, videoId);
+async function analyzeVideo(_: string, videoId: string) {
+	const prompt = `Act as a world-class strategic analyst using your native YouTube extension. Your analysis should be deep, insightful, and structured for clarity.
 
-	const prompt = `Analyze the following YouTube video and provide:
-  1. A concise summary (around 100-150 words).
-  2. The top 3-5 key topics or themes.
-  3. An overall sentiment analysis (e.g., Positive, Negative, Neutral, Mixed).
+For the video linked below, please provide the following:
 
-  Video Title: "${title}"
-  Video Description: "${description}"
-  `;
+1. **The Core Thesis:** In a single, concise sentence, what is the absolute central argument of this video? 
+2. **Key Pillars of Argument:** Present the 3-5 main arguments that support the core thesis. 
+3. **The Hook Deconstructed:** Quote the hook from the first 30 seconds and explain the psychological trigger it uses (e.g., "Creates an information gap," "Challenges a common belief"). 
+4. **Most Tweetable Moment:** Identify the single most powerful, shareable quote from the video and present it as a blockquote.
+5. **Audience & Purpose:** Describe the target audience and the primary goal the creator likely had (e.g., "Educate beginners," "Build brand affinity").
+
+Analyze this video: https://www.youtube.com/watch?v=${videoId}`;
 
 	const result = await generativeModel.generateContent(prompt);
 	const response = await result.response;
 	return response.text();
 }
 
-async function getVideoDetails(accessToken: string, videoId: string) {
-	const oauth2Client = new google.auth.OAuth2();
-	oauth2Client.setCredentials({ access_token: accessToken });
+// async function getVideoDetails(accessToken: string, videoId: string) {
+//   const oauth2Client = new google.auth.OAuth2();
+//   oauth2Client.setCredentials({ access_token: accessToken });
 
-	const youtube = google.youtube({
-		version: "v3",
-		auth: oauth2Client,
-	});
+//   const youtube = google.youtube({
+//     version: "v3",
+//     auth: oauth2Client,
+//   });
 
-	const videoDetailsResponse = await youtube.videos.list({
-		id: [videoId],
-		part: ["snippet"],
-	});
+//   const videoDetailsResponse = await youtube.videos.list({
+//     id: [videoId],
+//     part: ["snippet"],
+//   });
 
-	const video = videoDetailsResponse.data.items?.[0];
-	if (!video || !video.snippet) {
-		throw new Error("Video not found");
-	}
-	return video.snippet;
-}
+//   const video = videoDetailsResponse.data.items?.[0];
+//   if (!video || !video.snippet) {
+//     throw new Error("Video not found");
+//   }
+//   return video.snippet;
+// }
 
 export async function POST(req: NextRequest) {
 	const session = await auth();
