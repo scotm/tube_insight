@@ -5,12 +5,12 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { type Video, VideoArraySchema } from "@/types/youtube";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { type Video, VideoArraySchema } from "@/types/youtube";
 
 export default function PlaylistDetailPage() {
 	const { data: session } = useSession();

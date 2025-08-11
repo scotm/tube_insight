@@ -1,6 +1,11 @@
 import { google } from "googleapis";
 import type { NextRequest } from "next/server";
 import {
+	ensureVideoByYoutubeId,
+	findAnalysis,
+	upsertAnalysis,
+} from "@/db/repositories/analysis";
+import {
 	badRequest,
 	internal,
 	notFound,
@@ -10,14 +15,9 @@ import {
 } from "@/lib/api";
 import { auth } from "@/lib/auth";
 import { generativeModel, modelName } from "@/lib/gemini";
-import { AnalysisVideoBodySchema } from "@/types/schemas";
-import { analysisLimiter } from "@/lib/rateLimit";
 import { sha256Hex } from "@/lib/hash";
-import {
-	ensureVideoByYoutubeId,
-	findAnalysis,
-	upsertAnalysis,
-} from "@/db/repositories/analysis";
+import { analysisLimiter } from "@/lib/rateLimit";
+import { AnalysisVideoBodySchema } from "@/types/schemas";
 
 const youtube = google.youtube({
 	version: "v3",

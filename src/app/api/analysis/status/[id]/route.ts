@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
-import { JobIdParamSchema } from "@/types/schemas";
-import { badRequest, notFound, ok, toIssues } from "@/lib/api";
 import { getJob } from "@/lib/analysisQueue";
+import { badRequest, notFound, ok, toIssues } from "@/lib/api";
+import { JobIdParamSchema } from "@/types/schemas";
 
 export async function GET(
 	_req: NextRequest,

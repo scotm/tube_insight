@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth, type SessionWithAccessToken } from "@/lib/auth";
-import { AnalysisPlaylistBodySchema } from "@/types/schemas";
-import { badRequest, ok, toIssues, unauthorized } from "@/lib/api";
 import { enqueuePlaylist } from "@/lib/analysisQueue";
+import { badRequest, ok, toIssues, unauthorized } from "@/lib/api";
+import { auth, type SessionWithAccessToken } from "@/lib/auth";
 import { analysisLimiter } from "@/lib/rateLimit";
+import { AnalysisPlaylistBodySchema } from "@/types/schemas";
 
 export async function POST(req: NextRequest) {
 	const session = await auth();

@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { type Playlist, PlaylistArraySchema } from "@/types/youtube";
 import { Skeleton } from "@/components/ui/skeleton";
+import { type Playlist, PlaylistArraySchema } from "@/types/youtube";
+
 const SKELETON_KEYS = ["sk-0", "sk-1", "sk-2", "sk-3", "sk-4", "sk-5"] as const;
 
 export default function PlaylistsPage() {

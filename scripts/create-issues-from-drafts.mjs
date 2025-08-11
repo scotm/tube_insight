@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 const file = "docs/issue-drafts.md";
 const md = readFileSync(file, "utf8");
@@ -17,7 +17,7 @@ for (const line of lines) {
 		title = title.replace(/^\d+\)\s+/, "");
 		current = { title, body: "" };
 	} else if (current) {
-		current.body += line + "\n";
+		current.body += `${line}\n`;
 	}
 }
 if (current) sections.push(current);

@@ -7,7 +7,9 @@ import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+
 const SKELETON_KEYS = ["sk-0", "sk-1", "sk-2", "sk-3", "sk-4", "sk-5"] as const;
+
 import { type Playlist, PlaylistArraySchema } from "@/types/youtube";
 
 const fetchPlaylists = async (): Promise<Playlist[]> => {
