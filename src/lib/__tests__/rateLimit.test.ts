@@ -1,3 +1,5 @@
+import { jest } from "@jest/globals";
+
 import { SlidingWindowLimiter } from "../rateLimit";
 
 describe("rateLimit", () => {

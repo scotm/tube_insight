@@ -1,3 +1,5 @@
+import { jest } from "@jest/globals";
+
 import { google } from "googleapis";
 import { getPlaylists, getVideosForPlaylist } from "../youtube";
 
@@ -12,23 +14,31 @@ jest.mock("googleapis", () => ({
 	},
 }));
 
-const mockYoutube = google.youtube as jest.Mock;
-const mockOAuth2 = google.auth.OAuth2 as jest.Mock;
+type MockedGoogle = {
+	auth: { OAuth2: jest.Mock };
+	youtube: jest.Mock;
+};
+const mockedGoogle = google as unknown as MockedGoogle;
+const mockYoutube = mockedGoogle.youtube;
+const mockOAuth2 = mockedGoogle.auth.OAuth2;
 const mockSetCredentials = jest.fn();
+
+type ApiItem = { id?: string } | Record<string, unknown>;
+type ApiResponse = { data: { items: ApiItem[]; nextPageToken?: string } };
+type AsyncApiFn = (...args: unknown[]) => Promise<ApiResponse>;
 
 describe("youtube helpers", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
-		(mockOAuth2 as jest.Mock).mockImplementation(() => ({
+		mockOAuth2.mockImplementation(() => ({
 			setCredentials: mockSetCredentials,
 		}));
 	});
 
 	describe("getPlaylists", () => {
 		it("should correctly initialize the youtube client", async () => {
-			const mockPlaylistsList = jest
-				.fn()
-				.mockResolvedValue({ data: { items: [] } });
+			const mockPlaylistsList = jest.fn() as jest.Mock<AsyncApiFn>;
+			mockPlaylistsList.mockResolvedValue({ data: { items: [] } });
 			mockYoutube.mockReturnValue({ playlists: { list: mockPlaylistsList } });
 
 			await getPlaylists("test-access-token");
@@ -44,20 +54,19 @@ describe("youtube helpers", () => {
 		});
 
 		it("should fetch and paginate through all playlists", async () => {
-			const mockPlaylistsList = jest
-				.fn()
-				.mockResolvedValueOnce({
-					data: {
-						items: [{ id: "pl1" }, { id: "pl2" }],
-						nextPageToken: "token-2",
-					},
-				})
-				.mockResolvedValueOnce({
-					data: {
-						items: [{ id: "pl3" }],
-						nextPageToken: undefined, // Last page
-					},
-				});
+			const mockPlaylistsList = jest.fn() as jest.Mock<AsyncApiFn>;
+			mockPlaylistsList.mockResolvedValueOnce({
+				data: {
+					items: [{ id: "pl1" }, { id: "pl2" }],
+					nextPageToken: "token-2",
+				},
+			});
+			mockPlaylistsList.mockResolvedValueOnce({
+				data: {
+					items: [{ id: "pl3" }],
+					nextPageToken: undefined, // Last page
+				},
+			});
 
 			mockYoutube.mockReturnValue({ playlists: { list: mockPlaylistsList } });
 
@@ -74,7 +83,8 @@ describe("youtube helpers", () => {
 		});
 
 		it("should stop fetching after the safety cap is reached", async () => {
-			const mockPlaylistsList = jest.fn().mockImplementation(() =>
+			const mockPlaylistsList = jest.fn() as jest.Mock<AsyncApiFn>;
+			mockPlaylistsList.mockImplementation(() =>
 				Promise.resolve({
 					data: {
 						items: Array(50).fill({}),
@@ -94,19 +104,18 @@ describe("youtube helpers", () => {
 
 	describe("getVideosForPlaylist", () => {
 		it("should fetch and paginate through all videos in a playlist", async () => {
-			const mockPlaylistItemsList = jest
-				.fn()
-				.mockResolvedValueOnce({
-					data: {
-						items: [{ id: "vid1" }],
-						nextPageToken: "token-2",
-					},
-				})
-				.mockResolvedValueOnce({
-					data: {
-						items: [{ id: "vid2" }],
-					},
-				});
+			const mockPlaylistItemsList = jest.fn() as jest.Mock<AsyncApiFn>;
+			mockPlaylistItemsList.mockResolvedValueOnce({
+				data: {
+					items: [{ id: "vid1" }],
+					nextPageToken: "token-2",
+				},
+			});
+			mockPlaylistItemsList.mockResolvedValueOnce({
+				data: {
+					items: [{ id: "vid2" }],
+				},
+			});
 			mockYoutube.mockReturnValue({
 				playlistItems: { list: mockPlaylistItemsList },
 			});
@@ -121,7 +130,8 @@ describe("youtube helpers", () => {
 		});
 
 		it("should stop fetching videos after the safety cap is reached", async () => {
-			const mockPlaylistItemsList = jest.fn().mockImplementation(() =>
+			const mockPlaylistItemsList = jest.fn() as jest.Mock<AsyncApiFn>;
+			mockPlaylistItemsList.mockImplementation(() =>
 				Promise.resolve({
 					data: {
 						items: Array(50).fill({}),

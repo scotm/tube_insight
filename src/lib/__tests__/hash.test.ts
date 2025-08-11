@@ -4,9 +4,6 @@ describe("hash", () => {
 	describe("sha256Hex", () => {
 		it("should generate a valid SHA-256 hash for a given string", () => {
 			const input = "test input";
-			// This expected value seems to be specific to the test runner's environment.
-			// The standard SHA-256 for "test input" is different.
-			// Accepting this value to make the test pass, but it's worth noting.
 			const expected =
 				"9dfe6f15d1ab73af898739394fd22fd72a03db01834582f24bb2e1c66c7aaeae";
 			const result = sha256Hex(input);

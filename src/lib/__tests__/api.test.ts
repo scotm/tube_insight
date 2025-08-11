@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import type { ZodIssue } from "zod";
 import {
 	badRequest,
 	type Issue,
@@ -29,17 +28,14 @@ describe("api helpers", () => {
 
 	describe("toIssues", () => {
 		it("should convert ZodIssues to a simplified Issue array", () => {
-			const zodIssues: ZodIssue[] = [
+			const zodIssues = [
 				{
 					code: "invalid_type",
-					expected: "string",
-					received: "undefined",
 					path: ["name"],
 					message: "Required",
 				},
 				{
-					code: "invalid_string",
-					validation: "email",
+					code: "invalid_format",
 					path: ["email"],
 					message: "Invalid email",
 				},
@@ -47,7 +43,7 @@ describe("api helpers", () => {
 			const result = toIssues({ issues: zodIssues });
 			expect(result).toEqual([
 				{ path: ["name"], message: "Required", code: "invalid_type" },
-				{ path: ["email"], message: "Invalid email", code: "invalid_string" },
+				{ path: ["email"], message: "Invalid email", code: "invalid_format" },
 			]);
 		});
 	});

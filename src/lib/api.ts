@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import type { ZodIssue } from "zod";
 
 export type Issue = {
 	path: PropertyKey[];
@@ -14,7 +13,10 @@ export type ApiError = {
 	};
 };
 
-export function toIssues(error: { issues: ZodIssue[] }): Issue[] {
+// Minimal shape needed from Zod issues without depending on deprecated types
+type MinimalIssueLike = { path: PropertyKey[]; message: string; code: string };
+
+export function toIssues(error: { issues: MinimalIssueLike[] }): Issue[] {
 	return error.issues.map((i) => ({
 		path: i.path,
 		message: i.message,
